@@ -22,16 +22,14 @@ const defaultIDs = [
 const MovieCards = ({ data = [] }) => {
   const [fallbackMovies, setFallbackMovies] = useState([]);
   const [favorites, setFavorites] = useState([]);
-  const placeholder = "https://placehold.co/400";
-
   const [userId, setUserId] = useState(null);
-
-  const navigate=useNavigate();
+  const navigate = useNavigate();
+  const placeholder = "https://placehold.co/400x600?text=No+Image";
 
   useEffect(() => {
     const unsub = onAuthStateChanged(auth, async (user) => {
       if (user) {
-        setUserId(user.uid); // ✅ correct field
+        setUserId(user.uid);
         const favRef = doc(db, "favorites", user.uid);
         const favSnap = await getDoc(favRef);
         if (favSnap.exists()) {
@@ -53,36 +51,30 @@ const MovieCards = ({ data = [] }) => {
     if (data.length === 0) loadDefaults();
   }, [data]);
 
-  const moviesToRender = data.length > 0 ? data : fallbackMovies;
-
-  const toggleFavorite = async (id) => {
+  const toggleFavorite = async (id, e) => {
+    e.stopPropagation(); // Prevent card navigation
     if (!userId) return alert("Please log in to save favorites.");
 
-    let updatedFavorites;
-    if (favorites.includes(id)) {
-      updatedFavorites = favorites.filter((fid) => fid !== id);
-    } else {
-      updatedFavorites = [...favorites, id];
-    }
+    const updatedFavorites = favorites.includes(id)
+      ? favorites.filter((fid) => fid !== id)
+      : [...favorites, id];
 
     setFavorites(updatedFavorites);
 
-    // 🔥 Save to Firestore
     await setDoc(doc(db, "favorites", userId), {
       movieIDs: updatedFavorites,
     });
   };
 
+  const moviesToRender = data.length > 0 ? data : fallbackMovies;
+
   return (
-    <div
-    
-    
-    className="flex flex-wrap justify-center gap-6 p-6">
+    <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-6 p-6">
       {moviesToRender.map((movie) => (
         <div
           key={movie.imdbID}
-          onClick={()=> navigate(`/movie/${movie.imdbID}`)}
-          className="relative w-48 border border-gray-300 rounded-lg overflow-hidden shadow-md transform hover:scale-105 transition duration-200"
+          onClick={() => navigate(`/movie/${movie.imdbID}`)}
+          className="relative bg-white rounded-2xl overflow-hidden shadow-md hover:shadow-xl transition-transform transform hover:-translate-y-1 cursor-pointer"
         >
           <img
             src={
@@ -91,6 +83,7 @@ const MovieCards = ({ data = [] }) => {
                 : placeholder
             }
             alt={movie.Title}
+            className="w-full h-72 object-cover"
             onError={(e) => {
               e.target.onerror = null;
               e.target.src = placeholder;
@@ -99,20 +92,26 @@ const MovieCards = ({ data = [] }) => {
 
           {/* Favorite Icon */}
           <button
-            onClick={() => toggleFavorite(movie.imdbID)}
-            className="absolute top-2 right-2 text-red-600 text-xl z-10"
+            onClick={(e) => toggleFavorite(movie.imdbID, e)}
+            className="absolute top-3 right-3 text-2xl z-10 text-red-500 hover:text-red-600"
             title="Toggle Favorite"
           >
             {favorites.includes(movie.imdbID) ? <FaHeart /> : <FaRegHeart />}
           </button>
 
-          <div className="bg-gray-50 p-3">
-            <h3 className="text-lg font-semibold">{movie.Title}</h3>
-            <p className="text-sm text-gray-700">
-              <strong>Year:</strong> {movie.Year}
+          {/* Card Content */}
+          <div className="p-4 bg-indigo-50">
+            <h3 className="text-indigo-900 text-lg font-semibold line-clamp-1">
+              {movie.Title}
+            </h3>
+            <p className="text-gray-700 text-sm mt-1">
+              <span className="font-medium">Year:</span> {movie.Year}
             </p>
-            <p className="text-sm text-gray-700">
-              <strong>Rating:</strong> {movie.imdbRating || "N/A"}
+            <p className="text-gray-600 text-sm mt-1 flex items-center gap-1">
+              <span className="font-medium">Rating:</span>
+              <span className="text-yellow-400">
+                {movie.imdbRating || "N/A"}
+              </span>
             </p>
           </div>
         </div>

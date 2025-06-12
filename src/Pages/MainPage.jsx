@@ -37,7 +37,6 @@ const MainPage = () => {
             return fullDetails;
           })
         );
-        console.log("Searched Movies:", detailedMovies);
         setMovies(detailedMovies);
       } else {
         setMovies([]);
@@ -54,46 +53,50 @@ const MainPage = () => {
     fetchData();
   };
 
-  // Skeleton card component
+  // Skeleton card for loading state
   const MovieCardSkeleton = () => (
-    <div className="w-48 rounded-lg border p-3 shadow animate-pulse">
+    <div className="w-44 sm:w-48 md:w-52 rounded-lg border border-indigo-100 p-3 shadow-sm bg-white">
       <Skeleton height={256} />
-      <Skeleton height={20} style={{ marginTop: 8, marginBottom: 6 }} />
+      <Skeleton height={20} className="mt-2 mb-1" />
       <Skeleton height={16} width={80} />
     </div>
   );
 
   return (
-    <>
-      <div>
-        <div style={{ marginTop: "20px" }}>
-          <form onSubmit={handleSearchClick}>
-            <input
-              type="text"
-              placeholder="Search movie..."
-              onChange={handleInputChange}
-              value={name}
-            />
-            <button type="submit" style={{ marginLeft: "10px" }}>
-              Find
-            </button>
-          </form>
-        </div>
+    <div className="max-w-7xl mx-auto px-4 sm:px-6 md:px-8 py-8">
+      {/* Search form */}
+      <form
+        onSubmit={handleSearchClick}
+        className="flex flex-col sm:flex-row items-center justify-center gap-4 mb-8"
+      >
+        <input
+          type="text"
+          placeholder="Search movie..."
+          onChange={handleInputChange}
+          value={name}
+          className="w-full sm:w-80 px-4 py-2 border border-gray-300 rounded-lg shadow-sm focus:outline-none focus:ring-2 focus:ring-indigo-500"
+        />
+        <button
+          type="submit"
+          className="bg-indigo-600 text-white px-5 py-2 rounded-lg hover:bg-indigo-700 transition font-medium"
+        >
+          Find
+        </button>
+      </form>
 
-        {/* Show skeletons while loading, else show movies */}
-        {loading ? (
-          <div className="flex flex-wrap justify-center gap-6 p-6">
-            {Array(6)
-              .fill()
-              .map((_, i) => (
-                <MovieCardSkeleton key={i} />
-              ))}
-          </div>
-        ) : (
-          <MovieCards data={movies} />
-        )}
-      </div>
-    </>
+      {/* Results */}
+      {loading ? (
+        <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 gap-6">
+          {Array(10)
+            .fill()
+            .map((_, i) => (
+              <MovieCardSkeleton key={i} />
+            ))}
+        </div>
+      ) : (
+        <MovieCards data={movies} />
+      )}
+    </div>
   );
 };
 

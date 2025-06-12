@@ -9,6 +9,7 @@ import { useNavigate } from "react-router-dom";
 import { doc, setDoc } from "firebase/firestore";
 import { db } from "../config/firebase";
 import { FaGoogle } from "react-icons/fa";
+import { toast } from "react-toastify";
 
 const AuthPage = () => {
   const [email, setEmail] = useState("");
@@ -22,12 +23,8 @@ const AuthPage = () => {
     e.preventDefault();
     try {
       if (isLogin) {
-        const userCredential = await signInWithEmailAndPassword(
-          auth,
-          email,
-          password
-        );
-        alert("Logged in!");
+        await signInWithEmailAndPassword(auth, email, password);
+        toast.success("Logged in successfully!");
       } else {
         const userCredential = await createUserWithEmailAndPassword(
           auth,
@@ -41,28 +38,28 @@ const AuthPage = () => {
           email,
           uid: user.uid,
         });
-        alert("Registered successfully!");
+        toast.success("Registered successfully!");
       }
       navigate("/home", { replace: true });
     } catch (error) {
-      alert(error.message);
+      toast.error(error.message);
     }
   };
 
   const handleGoogleLogin = async () => {
     try {
-      const result = await signInWithPopup(auth, provider);
-      alert("Logged in with Google!");
+      await signInWithPopup(auth, provider);
+      toast.success("Logged in with Google!");
       navigate("/home", { replace: true });
     } catch (error) {
-      alert(error.message);
+      toast.error(error.message);
     }
   };
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-[#1f1c2c] to-[#928dab] flex items-center justify-center px-4">
-      <div className="w-full max-w-md bg-white p-8 rounded-2xl shadow-2xl">
-        <h2 className="text-3xl font-bold text-center text-gray-800 mb-6">
+    <div className="min-h-screen bg-gradient-to-br from-indigo-50 via-white to-indigo-50 flex items-center justify-center px-4">
+      <div className="w-full max-w-md bg-white p-6 sm:p-8 rounded-2xl shadow-2xl">
+        <h2 className="text-2xl sm:text-3xl font-bold text-center text-indigo-900 mb-6">
           {isLogin ? "Welcome Back 👋" : "Create an Account"}
         </h2>
 
@@ -75,7 +72,7 @@ const AuthPage = () => {
                 value={name}
                 onChange={(e) => setName(e.target.value)}
                 required
-                className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-purple-500"
+                className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-indigo-600 text-gray-900"
               />
               <input
                 type="tel"
@@ -83,7 +80,7 @@ const AuthPage = () => {
                 value={mobile}
                 onChange={(e) => setMobile(e.target.value)}
                 required
-                className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-purple-500"
+                className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-indigo-600 text-gray-900"
               />
             </>
           )}
@@ -94,7 +91,7 @@ const AuthPage = () => {
             value={email}
             onChange={(e) => setEmail(e.target.value)}
             required
-            className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-purple-500"
+            className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-indigo-600 text-gray-900"
           />
 
           <input
@@ -103,12 +100,12 @@ const AuthPage = () => {
             value={password}
             onChange={(e) => setPassword(e.target.value)}
             required
-            className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-purple-500"
+            className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-indigo-600 text-gray-900"
           />
 
           <button
             type="submit"
-            className="w-full bg-purple-600 text-white py-2 rounded-lg hover:bg-purple-700 transition duration-200"
+            className="w-full bg-indigo-600 text-white py-2 rounded-lg hover:bg-indigo-700 transition duration-200 font-semibold text-base"
           >
             {isLogin ? "Login" : "Register"}
           </button>
@@ -116,23 +113,30 @@ const AuthPage = () => {
 
         <div className="mt-6 flex items-center justify-center">
           <div className="border-t w-full border-gray-300"></div>
-          <span className="px-3 text-gray-500 text-sm">or</span>
+          <span className="px-3 text-gray-600 text-sm">or</span>
           <div className="border-t w-full border-gray-300"></div>
         </div>
 
         <button
           onClick={handleGoogleLogin}
-          className="mt-4 w-full flex items-center justify-center bg-red-500 text-white py-2 rounded-lg hover:bg-red-600 transition duration-200"
+          className="mt-4 w-full flex items-center justify-center bg-yellow-400 text-white py-2 rounded-lg hover:bg-yellow-500 transition duration-200 font-semibold text-base"
         >
           <FaGoogle className="mr-2" />
           Sign in with Google
         </button>
 
-        <p className="mt-4 text-center text-sm text-gray-600">
+        <button
+          onClick={() => navigate("/")}
+          className="mt-4 w-full bg-gray-300 text-gray-800 py-2 rounded-lg hover:bg-gray-400 transition duration-200 font-semibold text-base"
+        >
+          Go to Main Page
+        </button>
+
+        <p className="mt-4 text-center text-sm text-gray-700">
           {isLogin ? "Don't have an account?" : "Already have an account?"}{" "}
           <button
             onClick={() => setIsLogin(!isLogin)}
-            className="text-purple-600 hover:underline font-medium"
+            className="text-indigo-600 hover:underline font-medium"
           >
             {isLogin ? "Register" : "Login"}
           </button>

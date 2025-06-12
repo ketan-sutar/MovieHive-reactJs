@@ -2,26 +2,23 @@ import React, { useEffect, useState } from "react";
 import MainPage from "./MainPage";
 import { Link, useNavigate } from "react-router-dom";
 import { signOut, onAuthStateChanged } from "firebase/auth";
-import { auth } from "../config/firebase";
-import { db } from "../config/firebase"; // ✅ import Firestore
-import { doc, getDoc } from "firebase/firestore"; // ✅
+import { auth, db } from "../config/firebase";
+import { doc, getDoc } from "firebase/firestore";
 import { FaUserCircle } from "react-icons/fa";
 
+import { toast } from "react-toastify";
 const HomePage = () => {
   const navigate = useNavigate();
   const [user, setUser] = useState(null);
-  const [userInfo, setUserInfo] = useState(null); // 🔽 Extra Firestore info
+  const [userInfo, setUserInfo] = useState(null);
   const [showDropdown, setShowDropdown] = useState(false);
 
   useEffect(() => {
     const unsubscribe = onAuthStateChanged(auth, async (currentUser) => {
       setUser(currentUser);
-
       if (currentUser) {
-        // 🔽 Fetch user data from Firestore
         const userDocRef = doc(db, "users", currentUser.uid);
         const userDoc = await getDoc(userDocRef);
-
         if (userDoc.exists()) {
           setUserInfo(userDoc.data());
         }
@@ -29,17 +26,16 @@ const HomePage = () => {
         setUserInfo(null);
       }
     });
-
     return () => unsubscribe();
   }, []);
 
   const handleLogout = () => {
     signOut(auth)
       .then(() => {
-        alert("Logged out!");
-        navigate("/", { replace: true });
+        toast.info("Logged out!");
+        navigate("/auth", { replace: true });
       })
-      .catch((error) => alert(error.message));
+      .catch((error) => toast.error(error.message));
   };
 
   const toggleDropdown = () => {
@@ -47,42 +43,45 @@ const HomePage = () => {
   };
 
   return (
-    <div className="relative">
-      <div className="flex justify-between items-center px-6 py-4 border-b">
-        <h1 className="text-2xl font-bold">Home Page</h1>
+    <div className="min-h-screen bg-gradient-to-br from-indigo-50 via-white to-indigo-50">
+      {/* Header */}
+      <header className="flex justify-between items-center px-4 sm:px-6 py-4 border-b bg-white shadow-sm">
+        <h1 className="text-xl sm:text-2xl font-bold text-indigo-900">
+          MovieHive
+        </h1>
 
         <div className="flex items-center space-x-4">
           <Link
             to="/favourites"
-            className="text-blue-600 underline hover:text-blue-800"
+            className="bg-indigo-100 text-indigo-700 px-4 py-2 rounded-full text-sm sm:text-base font-semibold hover:bg-indigo-200 transition duration-200 shadow-sm"
           >
-            Go to Favourites
+            ⭐ Go to Favourites
           </Link>
 
           <div className="relative">
-            {/* 👤 User Icon Button */}
             <button
               onClick={toggleDropdown}
-              className="text-3xl text-gray-700 hover:text-black"
+              className="text-3xl text-indigo-600 hover:text-indigo-700 transition"
             >
               <FaUserCircle />
             </button>
 
-            {/* 🔽 Dropdown */}
+            {/* Dropdown */}
             {showDropdown && user && (
-              <div className="absolute right-0 mt-2 bg-white shadow-lg border rounded p-4 w-64 z-50">
-                <p>
-                  <strong>Email:</strong> {user.email}
+              <div className="absolute right-0 mt-2 bg-white border border-gray-200 shadow-xl rounded-lg p-4 w-64 z-50">
+                <p className="text-sm text-gray-700">
+                  <strong className="text-gray-900">Email:</strong> {user.email}
                 </p>
                 {userInfo?.name && (
-                  <p>
-                    <strong>Name:</strong> {userInfo.name}
+                  <p className="text-sm text-gray-700 mt-1">
+                    <strong className="text-gray-900">Name:</strong>{" "}
+                    {userInfo.name}
                   </p>
                 )}
-               
+
                 <button
                   onClick={handleLogout}
-                  className="mt-3 w-full bg-red-500 text-white py-1 px-3 rounded hover:bg-red-600"
+                  className="mt-4 w-full bg-indigo-600 text-white py-2 px-4 rounded-lg hover:bg-indigo-700 transition duration-200 text-sm font-semibold"
                 >
                   Logout
                 </button>
@@ -90,9 +89,12 @@ const HomePage = () => {
             )}
           </div>
         </div>
-      </div>
+      </header>
 
-      <MainPage />
+      {/* Main Content */}
+      <main className="px-4 sm:px-6 md:px-8 py-6">
+        <MainPage />
+      </main>
     </div>
   );
 };
